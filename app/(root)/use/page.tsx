@@ -5,13 +5,16 @@ import { useState } from "react";
 export default function Use() {
   const [inputText, setInputText] = useState("");
   const [result, setResult] = useState("");
+  const [goodCount, setGoodCount] = useState(0);
+  const [badCount, setBadCount] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // New loading state
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setResult("");
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
+
     try {
       const response = await fetch("/api/classify-deed", {
         method: "POST",
@@ -20,20 +23,41 @@ export default function Use() {
       });
 
       const data = await response.json();
-      setResult(data.result || "Unable to classify.");
+
+      if (response.ok) {
+        const classification = data.result || "Unable to classify.";
+        setResult(classification);
+
+        if (classification === "good") {
+          setGoodCount((prev) => prev + 1);
+        } else if (classification === "bad") {
+          setBadCount((prev) => prev + 1);
+        }
+      } else {
+        setResult("Error: " + (data.message || "Unable to classify the deed."));
+      }
     } catch (error) {
+      console.error("Error calling API:", error);
       setResult("An error occurred while processing your request.");
     } finally {
-      setIsLoading(false); // Stop loading
+      setIsLoading(false);
+    }
+  };
+
+  const getSantaMessage = () => {
+    if (goodCount > badCount) {
+      return "Santa is happy! You will get presents! 🎁";
+    } else {
+      return "Santa is disappointed. Try doing more good deeds! 🎅";
     }
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Classify Your Deed</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-gray-100">
+      <h1 className="text-3xl font-bold mb-4 text-center">Classify Your Deed</h1>
       <button
         onClick={() => setIsModalOpen(true)}
-        className="bg-blue-500 text-white px-4 py-2 rounded"
+        className="bg-blue-500 text-white px-6 py-3 rounded shadow-md hover:bg-blue-600 focus:outline-none"
       >
         Input what you have done!
       </button>
@@ -61,9 +85,11 @@ export default function Use() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`px-4 py-2 rounded ${isLoading ? 'bg-gray-400' : 'bg-green-500 text-white'}`}
+                  className={`px-4 py-2 rounded ${
+                    isLoading ? "bg-gray-400" : "bg-green-500 text-white"
+                  }`}
                 >
-                  {isLoading ? 'Loading...' : 'Submit'}
+                  {isLoading ? "Loading..." : "Submit"}
                 </button>
               </div>
             </form>
@@ -72,10 +98,20 @@ export default function Use() {
       )}
 
       {result && (
-        <p className="mt-4 text-center">
+        <p className="mt-6 text-center">
           Your deed is classified as: <strong>{result}</strong>
         </p>
       )}
+
+      <div className="mt-8 text-center">
+        <p>
+          <strong>Good Deeds:</strong> {goodCount}
+        </p>
+        <p>
+          <strong>Bad Deeds:</strong> {badCount}
+        </p>
+        <p className="mt-4 text-lg font-bold">{getSantaMessage()}</p>
+      </div>
     </div>
   );
 }
