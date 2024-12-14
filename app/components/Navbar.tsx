@@ -1,29 +1,27 @@
-"use client";
-
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import AuthButton from "./AuthButton";
+import './Navbar.css'; 
 
-const Navbar = () => {
+const Navbar: React.FC = () => {
   return (
-    <header className="px-5 py-3 bg-teal-400 shadow-sm font-work-sans">
-      <nav className="flex items-center">
-        <Link href="/">
-          <Image src="/logo.png" alt="logo" width={50} height={5} />
+    <header className="navbar-container">
+      <nav className="navbar">
+        <Link href="/" className="navbar-logo">
+          <Image 
+            src="/santa.png" 
+            alt="logo" 
+            className="navbar-logo-img" 
+            width={100}  
+            height={100} 
+          />
         </Link>
 
-        <div className="flex-1 flex justify-center items-center gap-44 text-lg">
-          <Link href="/about" className="text-white hover:text-gray-200">
-            About
-          </Link>
-          <Link href="/use" className="text-white hover:text-gray-200">
-            Use
-          </Link>
-          <Link href="/team" className="text-white hover:text-gray-200">
-            Team
-          </Link>
-          
+        <div className="navbar-links">
+          <Link href="/about" className="navbar-link">About</Link>
+          <Link href="/use" className="navbar-link">Use</Link>
+          <Link href="/team" className="navbar-link">Team</Link>
         </div>
 
         <AuthButton />
